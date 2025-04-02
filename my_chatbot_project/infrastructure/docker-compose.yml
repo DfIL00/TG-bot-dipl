@@ -1,0 +1,42 @@
+
+services:
+  backend:
+    networks:
+      - app-network
+  web:
+    build:
+      context: .  # Корень проекта
+      dockerfile: infrastructure/docker/Dockerfile
+    command: gunicorn --bind 0.0.0.0:8000 chatbot_project.asgi:application -k uvicorn.workers.UvicornWorker
+    volumes:
+      - ..:/app
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: chatbot_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6-alpine
+
+  nginx:
+    build:
+      context: .
+      dockerfile: infrastructure\nginx\Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ..\frontend/public:/app/frontend/public  # Для статики
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:

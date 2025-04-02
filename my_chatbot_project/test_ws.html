@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        // 1. Подключение к WebSocket
+        const socket = new WebSocket(
+            'ws://localhost:8000/ws/chat/123/?token=ВАШ_JWT_ТОКЕН'
+        );
+
+        // 2. Обработчики событий
+        socket.onopen = function(e) {
+            console.log('Соединение установлено');
+            socket.send(JSON.stringify({message: "Привет"}));
+        };
+
+        socket.onmessage = function(event) {
+            console.log('Получено:', JSON.parse(event.data));
+        };
+
+        socket.onclose = function(event) {
+            console.log('Соединение закрыто');
+        };
+
+        socket.onerror = function(error) {
+            console.log('Ошибка:', error);
+        };
+    </script>
+</body>
+</html>
